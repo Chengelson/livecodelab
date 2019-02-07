@@ -13,7 +13,7 @@
     background: none;
 }
 
-.cm-s-night span { background: yellow; color: #ffdd00;}
+.cm-s-night span { background: green; color: #ffdd00;}
 .cm-s-night span.cm-comment { color: #6900a1; }
 .cm-s-night span.cm-atom { color: #845dc4; }
 .cm-s-night span.cm-number,

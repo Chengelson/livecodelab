@@ -4,7 +4,7 @@
 ###
 
 class WebAudioApi
-	
+
   constructor: () ->
     @context = new (window.AudioContext || window.webkitAudioContext)
     @soundout = @context.destination
@@ -21,90 +21,87 @@ class WebAudioApi
     @context.currentTime * 1000
 
   getUserMedia: (dictionary, callback) ->
-        try
-            navigator.getMedia = navigator.getUserMedia ||
-                navigator.webkitGetUserMedia ||
-                navigator.mozGetUserMedia ||
-                navigator.msGetUserMedia
+    try
+      navigator.getMedia = navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia
 
-            navigator.getMedia dictionary, callback, (err) ->
-                console.log("The following error occured: " + err);
-        catch e
-            throw "Could not getMedia"
-            
-            
+      navigator.getMedia dictionary, callback, (err) ->
+        console.log("The following error occured: " + err)
+    catch e
+      throw "Could not getMedia"
+
+
   callback: (data) =>
-  	console.log('ESTAMOS YA EN EL CALLBACCKKKKKSS')
-  	  
-  	  
+    console.log('ESTAMOS YA EN EL CALLBACCKKKKKSS')
+
   gotStream: (stream) =>
-        @bufLength = @length * @context.sampleRate
+    @bufLength = @length * @context.sampleRate
 
         # get an AudioNode from the stream
-        @mediaStreamSource = @context.createMediaStreamSource stream
-        @analyser = @context.createAnalyser()
-        
-        @analyser.fftSize = 1024
-        @analyser.smoothingTimeConstant = 0.3
+    @mediaStreamSource = @context.createMediaStreamSource stream
+    @analyser = @context.createAnalyser()
+
+    @analyser.fftSize = 1024
+    @analyser.smoothingTimeConstant = 0.3
         # binding to window because otherwise it'll
         # get garbage collected
-        window.microphoneProcessingNode = @createNode()
-        @mediaStreamSource.connect @analyser;
+    window.microphoneProcessingNode = @createNode()
+    @mediaStreamSource.connect @analyser;
        # @analyser.connect @mediaStreamSource;
-        
-        @mediaStreamSource.connect window.microphoneProcessingNode
-        window.microphoneProcessingNode.connect @context.destination
-        
+
+    test = @mediaStreamSource
+    console.log(window.microphoneProcessingNode)
+    @mediaStreamSource.connect window.microphoneProcessingNode
+    window.microphoneProcessingNode.connect @context.destination, 0
+
    createNode: =>
-        node = @context.createScriptProcessor @bufferSize, 2, 2
-        node.onaudioprocess = (e) =>
-            
-            #console.log('received audio ' +left[0])
-            # clone the samples
-            
-            freqByteData = new Uint8Array @analyser.frequencyBinCount
-            timeByteData = new Uint8Array @analyser.frequencyBinCount
-             
-            @analyser.getByteFrequencyData freqByteData;
-            @analyser.getByteTimeDomainData timeByteData;
-            @waveform = timeByteData
+    node = @context.createScriptProcessor @bufferSize, 2, 2
+    node.onaudioprocess = (e) =>
+      freqByteData = new Uint8Array @analyser.frequencyBinCount
+      timeByteData = new Uint8Array @analyser.frequencyBinCount
+
+      @analyser.getByteFrequencyData freqByteData;
+      @analyser.getByteTimeDomainData timeByteData;
+      @waveform = timeByteData
             #numbars = 14
 
-            for i in [0...@numbars]
-            	    multipliers = @analyser.frequencyBinCount / @numbars
-            	    
-            	    magnitude = 0
-            	    multipliers = Math.floor ( multipliers )
-            	    offset = i * multipliers 
-            	    #gotta sum/average the block, or we miss narrow-bandwidth spikes
-            	    for j in [0...multipliers]
-            	    	    magnitude += freqByteData[offset + j]            	    	   
-            	    
-            	    magnitude = magnitude / multipliers
-            	    @fft[i] = magnitude
+      for i in [0...@numbars]
+        multipliers = @analyser.frequencyBinCount / @numbars
 
-            @total += @bufferSize
-            if @total > @bufLength
-                outBuffer = @prepareBuffer()
-                @callback outBuffer
+        magnitude = 0
+        multipliers = Math.floor ( multipliers )
+        offset = i * multipliers
 
-        node
-        
+        for j in [0...multipliers]
+          magnitude += freqByteData[offset + j]
+
+        magnitude = magnitude / multipliers
+        @fft[i] = magnitude
+
+      @total += @bufferSize
+      if @total > @bufLength
+        outBuffer = @prepareBuffer()
+        @callback outBuffer
+
+    node
+
   activateMic: () =>
     console.log('hola +++++++++++++++++++++++')
-    
+
   getFFT: () =>
-     @fft
-     
+    @fft
+
   getWaveForm: () =>
-     @waveform 
-   
+    @waveform
+
   setNumVars: (value) =>
-     @numbars = value
-     
-  setSmoothingTimeConstant: (smooth) =>   
-     @analyser.smoothingTimeConstant = smooth
-      
+    @numbars = value
+
+  setSmoothingTimeConstant: (smooth) =>
+    @analyser.smoothingTimeConstant = smooth
+
   loadSample: (name, path) =>
     url = path
     request = new XMLHttpRequest()
@@ -129,5 +126,4 @@ class WebAudioApi
       source.connect(@soundout)
       source.start(0)
 
-module.exports = WebAudioApi
-
+  module.exports = WebAudioApi

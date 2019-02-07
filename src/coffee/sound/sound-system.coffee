@@ -37,19 +37,19 @@ class SoundSystem
         name: name,
         pattern: pattern
       })
-  	  
-  	  
+
+
   getFFT: () ->
-  	  @audioApi.getFFT()
- 
+    @audioApi.getFFT()
+
   getWaveForm: (value) ->
-  	  @audioApi.getWaveForm()
-  	  
+    @audioApi.getWaveForm()
+
   setSmoothingTimeConstant: (value) ->
-  	  @audioApi.setSmoothingTimeConstant value
-  	  
+    @audioApi.setSmoothingTimeConstant value
+
   setNumVars: (value) ->
-  	  @audioApi.setNumVars value
+    @audioApi.setNumVars value
 
   playSounds: (beat) =>
     for p in @playPatterns
@@ -58,4 +58,3 @@ class SoundSystem
     @clearPatterns()
 
 module.exports = SoundSystem
-
